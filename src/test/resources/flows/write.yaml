@@ -1,0 +1,17 @@
+id: write
+namespace: io.kestra.influxdb
+
+tasks:
+  - id: write-metrics
+    type: io.kestra.plugin.influxdb.Write
+    url: http://localhost:8086
+    token: my-token
+    org: my-org
+    bucket: my-bucket
+    wireInputMultilineData: |
+      cpu,host=server01,region=us_west value=0.64 1422568543702900257
+      mem,host=server01,region=us_west free=1024,total=4096 1422568543702900260
+
+  - id: verify-output
+    type: io.kestra.core.tasks.debugs.Return
+    format: "{{outputs['write-metrics'].count}}"
