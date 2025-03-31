@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @SuperBuilder
 @ToString
@@ -58,24 +57,28 @@ public class Write extends Task implements RunnableTask<Write.Output> {
         title = "InfluxDB URL",
         description = "The URL of the InfluxDB server"
     )
+    @Builder.Default
     private String url = "http://localhost:8086";
 
     @Schema(
         title = "InfluxDB token",
         description = "The authentication token for InfluxDB"
     )
+    @Builder.Default
     private String token = "my-token";
 
     @Schema(
         title = "InfluxDB organization",
         description = "The organization name in InfluxDB"
     )
+    @Builder.Default
     private String org = "my-org";
 
     @Schema(
         title = "InfluxDB bucket",
         description = "The bucket name in InfluxDB"
     )
+    @Builder.Default
     private String bucket = "my-bucket";
 
     /**
@@ -104,12 +107,17 @@ public class Write extends Task implements RunnableTask<Write.Output> {
             org,
             bucket
         )) {
-            var writeApi = influxDBClient.makeWriteApi();
-            var measurements = Measurement.fromWireLines(rawWireInputMultilineData);
-            writeApi.writeMeasurement(WritePrecision.NS, measurements);
+            var writeApi = influxDBClient.getWriteApiBlocking();
+            writeApi.writeRecord(bucket, org, WritePrecision.NS, rawWireInputMultilineData);
+
+            // Count the number of lines written
+            var count = rawWireInputMultilineData.lines()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty())
+                .count();
 
             return Output.builder()
-                .count(measurements.size())
+                .count((int) count)
                 .build();
         }
     }
@@ -164,7 +172,7 @@ public class Write extends Task implements RunnableTask<Write.Output> {
                 .map(String::trim)
                 .filter(line -> !line.isEmpty())
                 .map(Measurement::fromWireLine)
-                .collect(Collectors.toList());
+                .toList();
         }
     }
 

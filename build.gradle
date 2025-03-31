@@ -211,3 +211,8 @@ idea {
         downloadSources = true
     }
 }
+
+signing {
+    required { !version.endsWith("SNAPSHOT") }
+    sign publishing.publications
+}

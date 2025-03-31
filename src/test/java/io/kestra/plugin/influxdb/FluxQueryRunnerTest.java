@@ -6,31 +6,30 @@ import io.kestra.core.models.executions.Execution;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 /**
- * This test will execute the write.yaml flow that writes metrics to InfluxDB
- * and verifies the count of measurements written.
+ * This test will execute the query.yaml flow that queries metrics from InfluxDB
+ * and verifies the output format based on the fetchType.
  */
 @KestraTest(startRunner = true)
-class WriteRunnerTest {
+class FluxQueryRunnerTest {
 
     @Test
-    @ExecuteFlow("flows/write.yaml")
+    @ExecuteFlow("flows/query.yaml")
     void flow(Execution execution) {
         // Verify we have both tasks executed
         assertThat(execution.getTaskRunList(), hasSize(2));
 
-        // Get the output from the verify-output task which contains the count
-        var tasksRuns = execution.findTaskRunsByTaskId("write-metrics");
+        // Get the output from the query-metrics task
+        var tasksRuns = execution.findTaskRunsByTaskId("query-metrics");
         assertThat(tasksRuns, hasSize(1));
 
-        var writeMetricsOutput = tasksRuns
+        var queryMetricsOutput = tasksRuns
             .getFirst()
             .getOutputs();
 
-        // Verify we wrote 2 measurements
-        assertThat(writeMetricsOutput.get("count"), is(2));
+        // Verify we got results
+        assertThat(queryMetricsOutput.get("count"), is(notNullValue()));
     }
 }

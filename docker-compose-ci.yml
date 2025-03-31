@@ -12,7 +12,31 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-token
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      test: ["CMD", "curl", "-f", "http://influxdb:8086/health"]
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+      - kestra_network
+
+  kestra:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kestra
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    command: ["server", "local"]
+    networks:
+      - kestra_network
+
+volumes:
+  influxdb_data:
+  kestra_data:
+
+networks:
+  kestra_network:
+    driver: bridge
