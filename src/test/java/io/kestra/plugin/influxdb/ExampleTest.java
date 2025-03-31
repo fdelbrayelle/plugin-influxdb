@@ -1,4 +1,4 @@
-package io.kestra.plugin.templates;
+package io.kestra.plugin.influxdb;
 
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
@@ -15,7 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 /**
- * This test will only test the main task, this allow you to send any input
+ * This test will only test the main task, this allows you to send any input
  * parameters to your task and test the returning behaviour easily.
  */
 @KestraTest
